@@ -3,6 +3,7 @@ _default:
 
 # run linting and typecheking over the solutions
 @lint:
-	ruff solutions
+	black solutions
+	ruff solutions --fix
 	pyright
 
