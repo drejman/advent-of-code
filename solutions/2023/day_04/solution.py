@@ -2,6 +2,8 @@
 
 # puzzle prompt: https://adventofcode.com/2023/day/4
 
+from collections import defaultdict
+
 from ...base import StrSplitSolution, answer
 
 
@@ -11,55 +13,44 @@ class Solution(StrSplitSolution):
 
     @answer(26914)
     def part_1(self) -> int:
-        self.numbers: dict[int, tuple[set[int], set[int]]] = {}
         self._parse_input()
 
         result = 0
-        for card in self.numbers.keys():
-            match = self.numbers[card][1].intersection(self.numbers[card][0])
-            if match:
-                result += 2 ** (len(match) - 1)
+        for matches in filter(lambda x: x != 0, self.cards.values()):
+            result += 2 ** (matches - 1)
         return result
 
-    # @answer(1234)
+    @answer(13080971)
     def part_2(self) -> int:
-        self.numbers: dict[int, tuple[set[int], set[int]]] = {}
         self._parse_input()
 
-        results: dict[int, int] = {}
-        cards: dict[int, int] = {}
-        for card_number in sorted(self.numbers.keys()):
-            match = self.numbers[card_number][1].intersection(
-                self.numbers[card_number][0]
-            )
-            cards[card_number] = 1
-            if match:
-                results[card_number] = len(match)
+        cards_won: dict[int, int] = defaultdict(int)
+        last_card = max(self.cards.keys())
+        for card_number, matches in self.cards.items():
+            cards_won[card_number] += 1  # increment for original card
 
-        self.debug(results)
-        for card_number in sorted(results.keys()):
-            for i in range(1, results[card_number] + 1):
-                try:
-                    cards[card_number + i] += cards[card_number]
-                except KeyError:
-                    continue
+            # increment next N cards (N being number of matches) by number of copies of currectly processed card
+            for i in range(
+                card_number + 1, min(card_number + matches + 1, last_card + 1)
+            ):
+                cards_won[i] += cards_won[card_number]
 
-        self.debug(cards)
-        return sum(cards.values())
+        return sum(cards_won.values())
 
     def _parse_input(self) -> None:
+        # represent input as a dict structure: {card_number: number_of_matches}
+        self.cards: dict[int, int] = {}
         for line in self.input:
             card, numbers = line.split(":")
             card_number = int(card.removeprefix("Card "))
-            winning_numbers, chosen_numbers = map(self._map, numbers.split("|"))
-            self.numbers[card_number] = (winning_numbers, chosen_numbers)
-        # self.debug(self.numbers)
+            winning_numbers, chosen_numbers = map(
+                self._parse_numbers_part, numbers.split("|")
+            )
+            self.cards[card_number] = len(
+                set(chosen_numbers).intersection(set(winning_numbers))
+            )
 
     @staticmethod
-    def _map(numbers: str) -> set[int]:
+    def _parse_numbers_part(numbers: str) -> set[int]:
         numbers = numbers.replace("  ", " ").lstrip().strip()
         return set(map(int, numbers.split(" ")))
-
-    # @answer((1234, 4567))
-    # def solve(self) -> tuple[int, int]:
-    #     pass
