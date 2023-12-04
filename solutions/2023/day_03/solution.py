@@ -4,7 +4,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from itertools import chain, groupby
+from itertools import chain, groupby, product
 
 from ...base import StrSplitSolution, answer
 
@@ -34,74 +34,34 @@ class Solution(StrSplitSolution):
 
     @answer(538046)
     def part_1(self) -> int:
-        self.parts: dict[int, list[Part]] = defaultdict(list)
-        self.symbols = defaultdict(list)
-        self.stars = defaultdict(list)
         self._parse_input()
 
         value = 0
-        for part in chain(*self.parts.values()):
-            for shift in [-1, 0, 1]:
-                if any(
-                    part.is_symbol_adjacent(line=part.line + shift, position=symbol)
-                    for symbol in self.symbols[part.line + shift]
-                ):
-                    value += part.value
-                    break
-        return value
-
-    def _parse_input(self):
-        for line_number, line in enumerate(self.input):
-            digits, symbols_, stars = self._parse_line(line)
-            self.stars[line_number] = stars
-            self.symbols[line_number] = symbols_
-            # self.debug(f"Line {line_number}: digits: {digits}, symbols locations: {symbols}")
-
-            for _, group in groupby(
-                enumerate(sorted(digits.keys())), key=lambda x: x[0] - x[1]
+        for part, shift in product(
+            chain.from_iterable(self.parts.values()), [-1, 0, 1]
+        ):
+            if any(
+                part.is_symbol_adjacent(line=part.line + shift, position=symbol)
+                for symbol in self.symbols[part.line + shift]
             ):
-                indices = [g[1] for g in group]
-                # self.debug(indices)
-                self.parts[line_number].append(
-                    Part(
-                        value=int("".join(str(digits[ix]) for ix in indices)),
-                        start=indices[0],
-                        end=indices[-1],
-                        line=line_number,
-                    )
-                )
-
-        # self.debug(self.parts)
-        # self.debug(self.symbols)
-
-    def _parse_line(self, line: str) -> tuple[dict[int, int], list[int], list[int]]:
-        digits: dict[int, int] = {}
-        symbols: list[int] = []
-        stars: list[int] = []
-        for ix, char in enumerate(line):
-            if char == ".":
+                value += part.value
                 continue
-            elif char.isdigit():
-                digits[ix] = int(char)
-            elif char == "*":
-                stars.append(ix)
-            else:
-                symbols.append(ix)
-        symbols.extend(stars)
-        return (digits, symbols, stars)
+        return value
 
     @answer(81709807)
     def part_2(self) -> int:
-        self.parts: dict[int, list[Part]] = defaultdict(list)
-        self.symbols = defaultdict(list)
-        self.stars = defaultdict(list)
         self._parse_input()
 
         gears = 0
 
-        for line_number, position in (
-            (ln, pos) for ln, positions in self.stars.items() for pos in positions
-        ):
+        # get coordinates but only from lines where there are stars
+        g = (
+            (line_number, position)
+            for line_number in self.stars.keys()
+            for position in self.stars[line_number]
+        )
+
+        for line_number, position in g:
             parts_adjacent = 0
             current_gear_value = 1
             parts = (
@@ -118,3 +78,44 @@ class Solution(StrSplitSolution):
                     gears += current_gear_value
 
         return gears
+
+    def _parse_input(self):
+        self.parts: dict[int, list[Part]] = defaultdict(list)
+        self.symbols = defaultdict(list)
+        self.stars = defaultdict(list)
+        for line_number, line in enumerate(self.input):
+            digits, symbols_, stars = self._parse_line(line)
+            self.stars[line_number] = stars
+            self.symbols[line_number] = symbols_
+
+            # find groups of consecutive numbers
+            for _, group in groupby(
+                enumerate(digits.keys()), key=lambda x: x[0] - x[1]
+            ):
+                indices = [g[1] for g in group]
+                self.parts[line_number].append(
+                    Part(
+                        value=int("".join(str(digits[ix]) for ix in indices)),
+                        start=indices[0],
+                        end=indices[-1],
+                        line=line_number,
+                    )
+                )
+
+    def _parse_line(self, line: str) -> tuple[dict[int, int], list[int], list[int]]:
+        digits: dict[int, int] = {}
+        symbols: list[int] = []
+        stars: list[int] = []
+        for ix, char in enumerate(line):
+            match char:
+                case ".":
+                    continue
+                case digit if digit.isdigit():
+                    digits[ix] = int(digit)
+                case "*":
+                    stars.append(ix)
+                case _:
+                    symbols.append(ix)
+        # stars still count as symbols for part 1
+        symbols.extend(stars)
+        return (digits, symbols, stars)
