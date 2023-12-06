@@ -3,6 +3,7 @@
 # puzzle prompt: https://adventofcode.com/2023/day/6
 
 from math import sqrt
+
 from ...base import StrSplitSolution, answer
 
 
@@ -16,13 +17,14 @@ class Solution(StrSplitSolution):
 
         ways_total = 1
         for time, distance in zip(self.times, self.distances):
-            ways = 0
             # brute force solution
-            for i in range(time):
-                if i*(time-i) > distance:
-                    ways += 1
+            ways = 0
+            gen = (i for i in range(time) if i * (time - i) > distance)
+            for _ in gen:
+                ways += 1
+
             ways_total *= ways
-        
+
         return ways_total
 
     @answer(34123437)
@@ -33,14 +35,18 @@ class Solution(StrSplitSolution):
 
         # quadratic equation solution
         # equation: -x^2 + time * x - distance = 0
-        discriminant = time**2 -4*distance
+        discriminant = time**2 - 4 * distance
         if discriminant < 0:
             raise ValueError(f"Discriminant negative: {discriminant}")
         sqrt_delta = sqrt(discriminant)
-        x1 = (-1*time + sqrt_delta)/-2
-        x2 = (-1*time - sqrt_delta)/-2
-        return int(x2+1) - int(x1+1)
+        x1 = (-1 * time + sqrt_delta) / -2
+        x2 = (-1 * time - sqrt_delta) / -2
+        return int(x2) - int(x1 + 1) + 1
 
     def _parse_input(self):
-        self.times: list[int] = list(map(int, self.input[0].removeprefix("Time:").split()))
-        self.distances: list[int] = list(map(int, self.input[1].removeprefix("Distance:").split()))
+        self.times: list[int] = list(
+            map(int, self.input[0].removeprefix("Time:").split())
+        )
+        self.distances: list[int] = list(
+            map(int, self.input[1].removeprefix("Distance:").split())
+        )
