@@ -5,5 +5,4 @@ _default:
 @lint:
 	black solutions
 	ruff solutions --fix
-	pyright
-
+	pyright solutions

@@ -29,7 +29,7 @@ class Solution(StrSplitSolution):
         result = 0
         for ix, (hand, bid) in enumerate(self.game):
             self.debug(f"{ix+1} {hand} {bid}")
-            result += (ix+1)*bid
+            result += (ix + 1) * bid
         return result
 
     def _parse_input(self):
@@ -40,26 +40,26 @@ class Solution(StrSplitSolution):
 
     @staticmethod
     def _sort_hand_part1(hand: str) -> int:
-        cards = digits+"TJQKA"
+        cards = digits + "TJQKA"
         counter = Counter(hand)
         counts = list(sorted(counter.values(), reverse=True))
         counts.append(0)  # hack to get rid of IndexErrors
-        rank = counts[0]*10+counts[1]
+        rank = counts[0] * 10 + counts[1]
 
         score = 0
         levels = len(hand)
         for ix, card in enumerate(hand):
-            score += cards.index(card) * (100**(levels-ix))
-        score += rank * (100**(levels+1))
+            score += cards.index(card) * (100 ** (levels - ix))
+        score += rank * (100 ** (levels + 1))
         return score
 
     @staticmethod
     def _sort_hand_part2(hand: str) -> int:
-        cards = "J"+digits+"TQKA"
+        cards = "J" + digits + "TQKA"
         score = 0
         levels = len(hand)
         for ix, card in enumerate(hand):
-            score += cards.index(card) * (100**(levels-ix))
+            score += cards.index(card) * (100 ** (levels - ix))
 
         counter = Counter((card for card in hand if card != "J"))
         counts = list(sorted(counter.values(), reverse=True))
@@ -67,6 +67,6 @@ class Solution(StrSplitSolution):
         for _ in (card for card in hand if card == "J"):
             if counts[0] < 5:
                 counts[0] += 1
-        rank = counts[0]*10+counts[1]
-        score += rank * (100**(levels+1))
+        rank = counts[0] * 10 + counts[1]
+        score += rank * (100 ** (levels + 1))
         return score
