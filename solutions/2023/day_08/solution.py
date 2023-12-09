@@ -4,13 +4,14 @@
 from itertools import chain, cycle
 from math import lcm
 
-from ...base import StrSplitSolution, answer
+from ...base import StrSplitSolution, answer, timeit
 
 
 class Solution(StrSplitSolution):
     _year = 2023
     _day = 8
 
+    @timeit
     @answer(16343)
     def part_1(self) -> int:
         self._parse_input()
@@ -27,6 +28,7 @@ class Solution(StrSplitSolution):
         else:
             raise ValueError("No solution found")
 
+    @timeit
     @answer(15299095336639)
     def part_2(self) -> int:
         self._parse_input()
@@ -41,7 +43,7 @@ class Solution(StrSplitSolution):
 
             for initial, current in current_locations.items():
                 if current.endswith("Z"):
-                    results[initial].append(ix + 1)
+                    results[initial].append(ix)
                     to_remove.append(initial)
                 match move:
                     case "L":
@@ -51,7 +53,6 @@ class Solution(StrSplitSolution):
                 current = current_locations[initial]
 
             for r in to_remove:
-                self.debug(f"Removed: {r}")
                 current_locations.pop(r, None)
 
             if not current_locations:

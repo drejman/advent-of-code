@@ -12,6 +12,7 @@ from enum import Enum, auto
 from functools import wraps
 from pathlib import Path
 from pprint import pprint
+from time import time
 from typing import (
     Callable,
     Generic,
@@ -239,6 +240,25 @@ def slow(
         return None
 
     return wrapper
+
+
+def timeit(
+    func: Callable[[SolutionClassType], OutputType]
+) -> Callable[[SolutionClassType], OutputType]:
+    @wraps(func)
+    def _time_it(self: SolutionClassType):
+        if self.is_debugging or self.use_test_data:
+            return func(self)
+        start = int(round(time() * 1000))
+        try:
+            return func(self)
+        finally:
+            end_ = int(round(time() * 1000)) - start
+            pprint(
+                f"Total execution time of {func.__name__}: {end_ if end_ > 0 else 0} ms"
+            )
+
+    return _time_it
 
 
 # these types ensure the return type of the function matches `@answer`
