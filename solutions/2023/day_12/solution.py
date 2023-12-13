@@ -3,7 +3,7 @@
 # puzzle prompt: https://adventofcode.com/2023/day/12
 from functools import cache
 from itertools import groupby, product
-from math import comb
+
 from ...base import StrSplitSolution, answer, timeit
 
 
@@ -37,7 +37,6 @@ class Solution(StrSplitSolution):
             solutions += solution_dp
         return solutions
 
-
     def _solve(self, line: str) -> int:
         solutions = 0
 
@@ -53,12 +52,14 @@ class Solution(StrSplitSolution):
             for i in range(unknown):
                 new_springs = new_springs.replace(self.UNKNOWN, comb_[i], 1)
             # self.debug(new_springs)
-            lengths = [len(list(k)) for g, k in groupby(new_springs) if g==self.BROKEN]
+            lengths = [
+                len(list(k)) for g, k in groupby(new_springs) if g == self.BROKEN
+            ]
             if lengths == numbers:
                 solutions += 1
 
-        return solutions    
-        
+        return solutions
+
     def _solve_dp(self, line: str) -> int:
         solutions = 0
 
@@ -66,13 +67,13 @@ class Solution(StrSplitSolution):
         damaged = tuple(map(int, numbers.split(",")))
         solutions = self._get_solutions(springs, damaged)
         return solutions
-    
+
     def _solve_dp_p2(self, line: str) -> int:
         solutions = 0
 
         springs, numbers = line.split()
-        numbers = ",".join([numbers]*5)
-        springs = "?".join([springs]*5)
+        numbers = ",".join([numbers] * 5)
+        springs = "?".join([springs] * 5)
         damaged = tuple(map(int, numbers.split(",")))
         solutions = self._get_solutions(springs, damaged)
         return solutions
@@ -88,21 +89,28 @@ class Solution(StrSplitSolution):
         # self.debug(f"{springs}: {damaged}")
         # if there are no ? then go straight to answer
         if self.UNKNOWN not in springs:
-            lengths = tuple(len(list(k)) for g, k in groupby(springs) if g==self.BROKEN)
+            lengths = tuple(
+                len(list(k)) for g, k in groupby(springs) if g == self.BROKEN
+            )
             if lengths == damaged:
                 return 1
             return 0
-        
+
         # if starts with ? then split into two branches
         if springs[0] == self.UNKNOWN:
-            solutions = self._get_solutions(springs=springs.replace(self.UNKNOWN, self.BROKEN, 1), damaged=damaged) +\
-                self._get_solutions(springs=springs.replace(self.UNKNOWN, self.WORKING, 1), damaged=damaged)
+            solutions = self._get_solutions(
+                springs=springs.replace(self.UNKNOWN, self.BROKEN, 1), damaged=damaged
+            ) + self._get_solutions(
+                springs=springs.replace(self.UNKNOWN, self.WORKING, 1), damaged=damaged
+            )
             if solutions:
                 self.debug(f"{springs}: {damaged} solutions: {solutions}")
             return solutions
 
-        groups = [(g, len(list(k))) for ix, (g, k) in enumerate(groupby(springs)) if ix < 2]
-        
+        groups = [
+            (g, len(list(k))) for ix, (g, k) in enumerate(groupby(springs)) if ix < 2
+        ]
+
         # if starts with . than remove whole group and continue
         if groups[0][0] == self.WORKING:
             index = groups[0][1]
@@ -116,19 +124,24 @@ class Solution(StrSplitSolution):
             if groups[1][0] == self.WORKING:
                 if groups[0][1] == damaged[0]:
                     index = groups[0][1] + groups[1][1]
-                    return self._get_solutions(springs=springs[index:], damaged=damaged[1:])
+                    return self._get_solutions(
+                        springs=springs[index:], damaged=damaged[1:]
+                    )
                 return 0
-            
+
             # if # group could be elongated by ? split
             if groups[1][0] == self.UNKNOWN:
-                solutions =  self._get_solutions(springs=springs.replace(self.UNKNOWN, self.BROKEN, 1), damaged=damaged) +\
-                    self._get_solutions(springs=springs.replace(self.UNKNOWN, self.WORKING, 1), damaged=damaged)
+                solutions = self._get_solutions(
+                    springs=springs.replace(self.UNKNOWN, self.BROKEN, 1),
+                    damaged=damaged,
+                ) + self._get_solutions(
+                    springs=springs.replace(self.UNKNOWN, self.WORKING, 1),
+                    damaged=damaged,
+                )
                 if solutions:
                     self.debug(f"{springs}: {damaged} solutions: {solutions} ")
                 return solutions
         raise ValueError(f"Nothing matched for {springs}: {damaged}")
-        
-        
 
     # @answer((1234, 4567))
     # def solve(self) -> tuple[int, int]:

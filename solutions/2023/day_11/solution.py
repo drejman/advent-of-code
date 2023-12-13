@@ -2,6 +2,7 @@
 
 # puzzle prompt: https://adventofcode.com/2023/day/11
 from itertools import combinations
+
 from ...base import StrSplitSolution, answer, timeit
 
 
@@ -17,7 +18,6 @@ class Solution(StrSplitSolution):
         for g1, g2 in combinations(self.galaxies, r=2):
             sum_ += self._find_distance(g1, g2)
         return sum_
-
 
     def _find_distance(self, g1: tuple[int, int], g2: tuple[int, int]) -> int:
         dist = 0
@@ -36,8 +36,7 @@ class Solution(StrSplitSolution):
             sum_ += self._find_distance(g1, g2)
         return sum_
 
-
-    def _parse_input(self, weight = 2):
+    def _parse_input(self, weight=2):
         # find empty lines
         galaxy = "#"
         self.row_weights = {}
@@ -55,8 +54,8 @@ class Solution(StrSplitSolution):
                 self.row_weights[ix] = 1
             while index != -1:
                 self.galaxies.append((index, ix))
-                index = line.find(galaxy, index+1)
-                
+                index = line.find(galaxy, index + 1)
+
         for ix, column in enumerate(self.columns):
             if galaxy not in column:
                 self.column_weights[ix] = weight
