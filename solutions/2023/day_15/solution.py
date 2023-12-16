@@ -4,6 +4,7 @@
 
 from collections import OrderedDict, defaultdict
 from functools import cache
+
 from ...base import StrSplitSolution, answer, timeit
 
 
