@@ -2,10 +2,9 @@
 
 # puzzle prompt: https://adventofcode.com/2023/day/14
 
-from copy import deepcopy
 from functools import cache
-from itertools import cycle
-from typing import Iterable, Sequence
+from typing import Sequence
+
 from ...base import StrSplitSolution, answer, timeit
 
 
@@ -16,15 +15,14 @@ class Solution(StrSplitSolution):
     @timeit
     @answer(108935)
     def part_1(self) -> int:
-        self.beams= tuple(self.input)
+        self.beams = tuple(self.input)
         self.beams = self._move(self.beams, direction="N")
         result = 0
-        max_value = (len(self.beams))
+        max_value = len(self.beams)
         for ln, line in enumerate(self.beams):
-            result += len(list(x for x in line if x == "O")) * (max_value-ln)
+            result += len(list(x for x in line if x == "O")) * (max_value - ln)
 
         return result
-
 
     @timeit
     @answer(100876)
@@ -39,21 +37,20 @@ class Solution(StrSplitSolution):
             i += 1
             if repeat := self.previous_cycle_beams.get(self.beams):
                 period = i - repeat  # 1
-                i += ((max_cycles - i) // period)*period
-                print(f"repeat: {repeat} period: {period} i: {i}")
+                i += ((max_cycles - i) // period) * period
             self.previous_cycle_beams[self.beams] = i
         result = 0
-        max_value = (len(self.beams))
+        max_value = len(self.beams)
         for ln, line in enumerate(self.beams):
-            result += len(list(x for x in line if x == "O")) * (max_value-ln)
+            result += len(list(x for x in line if x == "O")) * (max_value - ln)
 
         return result
 
     @classmethod
-    # @cache
+    @cache
     def _move(cls, beams: tuple[str, ...], direction: str) -> tuple[str, ...]:
         beams = tuple(cls._transform(beams, direction))
-                
+
         new_beams = []
         new_beams.append(beams[0])
         for ln, line in enumerate(beams[1:], 1):
@@ -62,13 +59,17 @@ class Solution(StrSplitSolution):
                 if char == "O":
                     col = "".join(line[ix] for line in new_beams)
                     if (pos := max(col.rfind("O"), col.rfind("#"))) != -1:
-                        if pos + 1 < ln and new_beams[pos+1][ix] == ".":
-                            new_beams[pos+1] = new_beams[pos+1][:ix]+"O"+new_beams[pos+1][ix+1:]
+                        if pos + 1 < ln and new_beams[pos + 1][ix] == ".":
+                            new_beams[pos + 1] = (
+                                new_beams[pos + 1][:ix]
+                                + "O"
+                                + new_beams[pos + 1][ix + 1 :]
+                            )
                             mod_line += "."
                         else:
                             mod_line += "O"
                     elif col.startswith("."):
-                        new_beams[0] = new_beams[0][:ix]+"O"+new_beams[0][ix+1:]
+                        new_beams[0] = new_beams[0][:ix] + "O" + new_beams[0][ix + 1 :]
                         mod_line += "."
                     else:
                         mod_line += char
@@ -76,15 +77,17 @@ class Solution(StrSplitSolution):
                     mod_line += char
             new_beams.append(mod_line)
 
-        new_beams = tuple(cls._transform(new_beams, direction, True))   
+        new_beams = tuple(cls._transform(new_beams, direction, True))
         return new_beams
-    
+
     @staticmethod
     def _transpose(block: Sequence[str]) -> list[str]:
         return ["".join([line[i] for line in block]) for i in range(len(block[0]))]
 
     @classmethod
-    def _transform(cls, block: Sequence[str], direction: str, revert: bool = False) -> Sequence[str]:
+    def _transform(
+        cls, block: Sequence[str], direction: str, revert: bool = False
+    ) -> Sequence[str]:
         match direction, revert:
             case "W", _:
                 block = cls._transpose(block=block)
