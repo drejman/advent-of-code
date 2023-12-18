@@ -180,7 +180,9 @@ class Solution(StrSplitSolution):
             fields=self._fields,
         ).propagate()
 
-    def get_energized_count(self, beam_data: BeamData, energized: dict[tuple[int, int], int]) -> int:
+    def get_energized_count(
+        self, beam_data: BeamData, energized: dict[tuple[int, int], int]
+    ) -> int:
         beams = queue.Queue()
         seen = set()
         beams.put(beam_data)
