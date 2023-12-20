@@ -6,7 +6,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from itertools import chain, groupby, product
 
-from ...base import StrSplitSolution, answer
+from ...base import StrSplitSolution, answer, timeit
 
 
 @dataclass
@@ -32,6 +32,7 @@ class Solution(StrSplitSolution):
     _year = 2023
     _day = 3
 
+    @timeit
     @answer(538046)
     def part_1(self) -> int:
         self._parse_input()
@@ -48,6 +49,7 @@ class Solution(StrSplitSolution):
                 continue
         return value
 
+    @timeit
     @answer(81709807)
     def part_2(self) -> int:
         self._parse_input()
