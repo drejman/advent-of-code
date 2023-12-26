@@ -74,7 +74,7 @@ class Solution(StrSplitSolution):
         self._parse_input()
         self._setup_modules()
         return self.warm_up_cables(iterations=1000)
-    
+
     @timeit
     @answer(253302889093151)
     def part_2(self) -> int:
